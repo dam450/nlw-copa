@@ -1,6 +1,7 @@
 interface HomeProps {
   poolCount: number
   guessCount: number
+  userCount: number
 }
 
 import Image from 'next/image'
@@ -9,8 +10,34 @@ import logoImg from '../assets/logo.svg'
 import usersAvatar from '../assets/users-avatar-example.png'
 import iconCheck from '../assets/icon-check.svg'
 import { api } from '../lib/axios'
+import { FormEvent, useState } from 'react'
 
 export default function Home(props: HomeProps) {
+
+  const [poolTitle, setPoolTitle] = useState('')
+
+  async function createPool(event: FormEvent) {
+    event.preventDefault()
+
+    try {
+      const response = await api.post('/pools', {
+        title: poolTitle,
+      })
+
+      const { code } = response.data
+      
+      await navigator.clipboard.writeText(code)
+
+      alert(`Bolão criado com sucesso, o código ${code} foi copiado para a área de transferencia!`)
+      setPoolTitle('')
+
+    } catch (err) {
+      console.log(err)
+      alert('Falha ao criar o bolão, tente novamente!')
+    }
+
+  }
+
   return (
     <div className='max-w-[1124px] h-screen mx-auto grid grid-cols-2 gap-28 items-center'>
       <main className='max-w-lg'>
@@ -22,14 +49,19 @@ export default function Home(props: HomeProps) {
         <div className='mt-10 flex items-center gap-2'>
           <Image src={usersAvatar} alt="Imagens de avatares de usuários" />
           <strong className='text-gray-100 font-bold text-xl'>
-            <span className='text-ignite-500'>+12.592</span> pessoas já estão usando
+            <span className='text-ignite-500'>+{props.userCount}</span> pessoas já estão usando
           </strong>
         </div>
 
-        <form className='mt-10 flex gap-2'>
+        <form 
+          onSubmit={createPool}
+          className='mt-10 flex gap-2'
+        >
           <input 
             type="text" name="" id="" required placeholder='Qual nome do seu bolão?'
-            className='flex-1 px-6 py-4 rounded bg-gray-800 border border-gray-600 text-sm'
+            className='flex-1 px-6 py-4 rounded bg-gray-800 border border-gray-600 text-sm text-gray-100'
+            onChange={event => setPoolTitle(event.target.value)}
+            value={poolTitle}
           />
           <button 
             type="submit" 
@@ -71,11 +103,18 @@ export default function Home(props: HomeProps) {
   )
 }
 
+
+//TO-DO: convert to static props
 export const getServerSideProps = async () => {
   
-  const [poolCountResponse, guessCountResponse] = await Promise.all([
+  const [
+    poolCountResponse, 
+    guessCountResponse, 
+    userCountResponse
+  ] = await Promise.all([
     api.get('pools/count'),
-    api.get('guesses/count')
+    api.get('guesses/count'),
+    api.get('users/count')
   ])
 
 
@@ -83,6 +122,7 @@ export const getServerSideProps = async () => {
     props: {
       poolCount: poolCountResponse.data.count,
       guessCount: guessCountResponse.data.count,
+      userCount: userCountResponse.data.count,
     }
   }
 }
