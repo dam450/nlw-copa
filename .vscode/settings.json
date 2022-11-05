@@ -1,9 +1,9 @@
 {
   "cSpell.words": ["fastify", "Fastify"],
 
-  "editor.formatOnSave": true,
+  "editor.formatOnSave": false,
   "editor.formatOnType": true,
-  "editor.formatOnPaste": true,
+  "editor.formatOnPaste": false,
 
   "[prisma]": {
     "editor.defaultFormatter": "Prisma.prisma"

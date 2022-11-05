@@ -9,3 +9,6 @@ prisma/*.db
 
 # local files
 *.local
+
+# vscode settings
+.vscode/*
