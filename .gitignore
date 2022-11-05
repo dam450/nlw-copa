@@ -6,3 +6,6 @@ node_modules
 
 # database
 prisma/*.db
+
+# local files
+*.local
