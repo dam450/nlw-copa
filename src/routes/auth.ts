@@ -4,11 +4,7 @@ import { prisma } from '../lib/prisma'
 import { authenticate } from '../plugins/authenticate'
 
 export async function authRoutes(fastify: FastifyInstance) {
-  fastify.get(
-    '/me',
-    {
-      onRequest: [authenticate]
-    },
+  fastify.get('/me',{ onRequest: [authenticate] },
     async request => {
       await request.jwtVerify()
 
