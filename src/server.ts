@@ -13,21 +13,29 @@ async function bootstrap() {
     logger: true
   })
 
-  await fastify.register(cors, {
-    origin: true
-  })
+  try {
+    await fastify.register(cors, {
+      origin: true
+    })
+  
+    await fastify.register(jwt, {
+      secret: 'nlwcopa' // em produção isso precisa ser uma variável de ambiente
+    })
+  
+    await fastify.register(authRoutes)
+    await fastify.register(gameRoutes)
+    await fastify.register(guessRoutes)
+    await fastify.register(poolRoutes)
+    await fastify.register(userRoutes)
+  
+    await fastify.listen({ port: 3333, host: '0.0.0.0' })
+    
+  } catch (error) {
+    fastify.log.error(error)
 
-  await fastify.register(jwt, {
-    secret: 'nlwcopa' //em produção isso precisa ser uma variável de ambiente
-  })
-
-  await fastify.register(authRoutes)
-  await fastify.register(gameRoutes)
-  await fastify.register(guessRoutes)
-  await fastify.register(poolRoutes)
-  await fastify.register(userRoutes)
-
-  await fastify.listen({ port: 3333, host: '0.0.0.0'})
+    process.exit(1)
+    
+  }
 }
 
 bootstrap()
