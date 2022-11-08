@@ -11,6 +11,7 @@ export interface PoolCardProps {
   createdAt: string;
   owner: {
     name: string;
+    id: string;
   },
   participants: ParticipantProps[];
   _count: {
