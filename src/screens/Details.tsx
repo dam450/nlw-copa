@@ -32,7 +32,6 @@ export function Details() {
       setIsLoading(true)
 
       const response = await api.get(`/pools/${id}`)
-      //console.info(response.data.pool)
       setPoolDetails(response.data.pool)
 
     } catch (error) {
@@ -85,7 +84,7 @@ export function Details() {
               />
             </HStack>
 
-            <Guesses poolId={poolDetails.id} />
+            <Guesses poolId={poolDetails.id} code={poolDetails.code} />
             
           </VStack>
           
