@@ -26,8 +26,10 @@ export function Guesses({ poolId, code }: Props) {
       const response = await api.get(`/pools/${poolId}/games`)
       setGames(response.data.games)
       
-    } catch (error) {
-      console.error(error)
+    } catch (err: any) {
+      console.error(err)
+      if(err.response) console.error(err.response)
+      if(err.request) console.error(err.request)
 
       toast.show({
         title: 'Não foi possível carregar os jogos',
@@ -47,7 +49,7 @@ export function Guesses({ poolId, code }: Props) {
           title: 'Informe o placar para confirmar o palpite',
           placement: 'top',
           bgColor: 'red.500'
-        })          
+        })
       }
 
       const response = await api.post(
@@ -66,16 +68,16 @@ export function Guesses({ poolId, code }: Props) {
       })
 
       fetchGames()
-      
-    } catch (error) {
-      console.error(error)
+    } catch (err: any) {
+      if (err.response?.data)
+        console.error(`Status ${err.response.status}:`, err.response.data)
+      else console.error(err)
 
       toast.show({
         title: 'Não foi possível enviar o palpite',
         placement: 'top',
         bgColor: 'red.500'
-      })      
-      
+      })
     }
   }
 
@@ -90,19 +92,17 @@ export function Guesses({ poolId, code }: Props) {
   return (
     <FlatList
       data={games}
-      keyExtractor={item => {
+      keyExtractor={(item) => {
         return item.id
       }}
-      renderItem={({ item }) => {
-        return (
-          <Game
-            data={item}
-            setFirstTeamPoints={setFirstTeamPoints}
-            setSecondTeamPoints={setSecondTeamPoints}
-            key={item.id}
-            onGuessConfirm={() => handleGuessConfirm(item.id)}
-            
-          />
+      renderItem={({ item }) => (
+        <Game
+          data={item}
+          setFirstTeamPoints={setFirstTeamPoints}
+          setSecondTeamPoints={setSecondTeamPoints}
+          key={item.id}
+          onGuessConfirm={() => handleGuessConfirm(item.id)}
+        />
       )}
       _contentContainerStyle={{ pb: 10 }}
       ListEmptyComponent={() => <EmptyMyPoolList code={code} />}
