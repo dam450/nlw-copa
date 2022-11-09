@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react'
-import { Box, FlatList, useToast } from 'native-base'
+import { FlatList, useToast } from 'native-base'
 import { Game, GameProps } from '../components/Game'
 
 import { api } from '../services/api'
+import { Loading } from './Loading'
 
 interface Props {
   poolId: string
@@ -10,7 +11,7 @@ interface Props {
 
 export function Guesses({ poolId }: Props) {
   const [isLoading, setIsLoading] = useState(true)
-  const [games, setGames] = useState([])
+  const [games, setGames] = useState<GameProps[]>([])
   const [firstTeamPoints, setFirstTeamPoints] = useState('')
     const [secondTeamPoints, setSecondTeamPoints] = useState('')
 
@@ -37,26 +38,73 @@ export function Guesses({ poolId }: Props) {
     }
   }
 
+  async function handleGuessConfirm(gameId: string) {
+    try {
+      if (!firstTeamPoints.trim() || !secondTeamPoints.trim()) {
+        return toast.show({
+          title: 'Informe o placar para confirmar o palpite',
+          placement: 'top',
+          bgColor: 'red.500'
+        })          
+      }
+
+      const response = await api.post(
+        `/pools/${poolId}/games/${gameId}/guesses`,
+        {
+          firstTeamPoints: Number(firstTeamPoints),
+          secondTeamPoints: Number(secondTeamPoints)
+        }
+      )
+      console.info(response.data)
+
+      toast.show({
+        title: 'Palpite realizado com sucesso!',
+        placement: 'top',
+        bgColor: 'green.500'
+      })
+
+      fetchGames()
+      
+    } catch (error) {
+      console.error(error)
+
+      toast.show({
+        title: 'Não foi possível enviar o palpite',
+        placement: 'top',
+        bgColor: 'red.500'
+      })      
+      
+    }
+  }
+
   useEffect(() => {
     fetchGames()
-  },[poolId])
+  }, [poolId])
+  
+  if (isLoading) {
+    return <Loading />
+  }
 
   return (
     <FlatList
       data={games}
-      keyExtractor={item => item.id}
-      renderItem={({ item }) => (
-        <Game
-          data={item}
-          setFirstTeamPoints={setFirstTeamPoints}
-          setSecondTeamPoints={setSecondTeamPoints}
-          key={item}
-          onGuessConfirm={() => null}
-
-        />
-      )}
+      keyExtractor={item => {
+        return item.id
+      }}
+      renderItem={({ item }) => {
+        return (
+          <Game
+            data={item}
+            setFirstTeamPoints={setFirstTeamPoints}
+            setSecondTeamPoints={setSecondTeamPoints}
+            key={item.id}
+            onGuessConfirm={() => handleGuessConfirm(item.id)}
+            
+          />
+        )
+      }}
     />
-
-    
   )
+
+
 }
