@@ -1,9 +1,3 @@
-interface HomeProps {
-  poolCount: number
-  guessCount: number
-  userCount: number
-}
-
 import Image from 'next/image'
 import appPreviewImage from '../assets/app-nlw-copa-preview.png'
 import logoImg from '../assets/logo.svg'
@@ -11,6 +5,12 @@ import usersAvatar from '../assets/users-avatar-example.png'
 import iconCheck from '../assets/icon-check.svg'
 import { api } from '../lib/axios'
 import { FormEvent, useState } from 'react'
+
+interface HomeProps {
+  poolCount: number
+  guessCount: number
+  userCount: number
+}
 
 export default function Home(props: HomeProps) {
 
@@ -104,25 +104,38 @@ export default function Home(props: HomeProps) {
 }
 
 
-//TO-DO: convert to static props
-export const getServerSideProps = async () => {
+export const getStaticProps = async () => {
   
-  const [
-    poolCountResponse, 
-    guessCountResponse, 
-    userCountResponse
-  ] = await Promise.all([
-    api.get('pools/count'),
-    api.get('guesses/count'),
-    api.get('users/count')
-  ])
+  try {
+    const [
+      poolCountResponse, 
+      guessCountResponse, 
+      userCountResponse
+    ] = await Promise.all([
+      api.get('pools/count'),
+      api.get('guesses/count'),
+      api.get('users/count')
+    ])
 
+    return {
+      props: {
+        poolCount: poolCountResponse.data.count,
+        guessCount: guessCountResponse.data.count,
+        userCount: userCountResponse.data.count,
+      },
+      revalidate: 300 // delay in seconds
+    }
 
-  return {
-    props: {
-      poolCount: poolCountResponse.data.count,
-      guessCount: guessCountResponse.data.count,
-      userCount: userCountResponse.data.count,
+  } catch (err) {
+
+    console.error(err, '\n\n<<< FALHA NO ACESSO A API >>>\n\n')
+
+    return {
+      props: {
+        poolCount: 0,
+        guessCount: 0,
+        userCount: 0,
+      }
     }
   }
 }
